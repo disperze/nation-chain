@@ -3,11 +3,11 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/disperze/nation-chain/x/nation/types"
 )
 
@@ -34,18 +34,34 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // Get returns the pubkey from the adddress-pubkey relation
-func (k Keeper) Get(ctx sdk.Context, key string) (/* TODO: Fill out this type */, error) {
+func (k Keeper) Get(ctx sdk.Context, key string) (types.Person, error) {
 	store := ctx.KVStore(k.storeKey)
-	var item /* TODO: Fill out this type */
+	var item types.Person
 	byteKey := []byte(key)
 	err := k.cdc.UnmarshalBinaryLengthPrefixed(store.Get(byteKey), &item)
 	if err != nil {
-		return nil, err
+		return item, err
 	}
 	return item, nil
 }
 
-func (k Keeper) set(ctx sdk.Context, key string, value /* TODO: fill out this type */ ) {
+// RegisterDni register new DNI
+func (k Keeper) RegisterDni(ctx sdk.Context, dni string, value types.Person) error {
+	if k.IsDNIPresent(ctx, dni) {
+		return sdkerrors.Wrap(types.ErrExistValue, "dni already register")
+	}
+
+	k.set(ctx, dni, value)
+	return nil
+}
+
+// IsDNIPresent Check if the DNI is present in the store or not
+func (k Keeper) IsDNIPresent(ctx sdk.Context, dni string) bool {
+	store := ctx.KVStore(k.storeKey)
+	return store.Has([]byte(dni))
+}
+
+func (k Keeper) set(ctx sdk.Context, key string, value types.Person) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(value)
 	store.Set([]byte(key), bz)
