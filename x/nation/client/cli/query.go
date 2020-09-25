@@ -2,15 +2,13 @@ package cli
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/disperze/nation-chain/x/nation/types"
 )
@@ -28,11 +26,33 @@ func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 	nationQueryCmd.AddCommand(
 		flags.GetCommands(
-	// TODO: Add query Cmds
+			GetCmdGetPerson(queryRoute, cdc),
 		)...,
 	)
 
 	return nationQueryCmd
 }
 
-// TODO: Add Query Commands
+// GetCmdGetPerson get person by DNI
+func GetCmdGetPerson(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "get [dni]",
+		Short: "Query a person by DNI",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			dni := args[0]
+
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s/%s", queryRoute, types.QueryGetPerson, dni), nil)
+			if err != nil {
+				fmt.Printf("could not resolve person %s \n%s\n", dni, err.Error())
+
+				return nil
+			}
+
+			var out types.Person
+			cdc.MustUnmarshalJSON(res, &out)
+			return cliCtx.PrintOutput(out)
+		},
+	}
+}
