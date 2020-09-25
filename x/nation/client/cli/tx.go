@@ -1,14 +1,15 @@
 package cli
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
@@ -27,33 +28,41 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	nationTxCmd.AddCommand(flags.PostCommands(
-		// TODO: Add tx based commands
-		// GetCmd<Action>(cdc)
+		GetCmdRegisterDni(cdc),
 	)...)
 
 	return nationTxCmd
 }
 
-// Example:
-//
-// GetCmd<Action> is the CLI command for doing <Action>
-// func GetCmd<Action>(cdc *codec.Codec) *cobra.Command {
-// 	return &cobra.Command{
-// 		Use:   "/* Describe your action cmd */",
-// 		Short: "/* Provide a short description on the cmd */",
-// 		Args:  cobra.ExactArgs(2), // Does your request require arguments
-// 		RunE: func(cmd *cobra.Command, args []string) error {
-// 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-// 			inBuf := bufio.NewReader(cmd.InOrStdin())
-// 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
+// GetCmdRegisterDni is the CLI command for doing RegisterDni
+func GetCmdRegisterDni(cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "register-dni [dni] [names] [first surname] [second surname]",
+		Short: "Register new DNI",
+		Args:  cobra.ExactArgs(4), // Does your request require arguments
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 
-// 			msg := types.NewMsg<Action>(/* Action params */)
-// 			err = msg.ValidateBasic()
-// 			if err != nil {
-// 				return err
-// 			}
+			validator, err := sdk.ValAddressFromBech32(cliCtx.GetFromAddress().String())
+			if err != nil {
+				return err
+			}
 
-// 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
-// 		},
-// 	}
-// }
+			names := strings.Split(args[1], " ")
+			msg := types.NewMsgRegisterDni(validator)
+			msg.Dni = args[0]
+			msg.Name = names[0]
+			msg.MiddleName = strings.Join(names[1:], " ")
+			msg.Surname1 = args[2]
+			msg.Surname2 = args[3]
+			err = msg.ValidateBasic()
+			if err != nil {
+				return err
+			}
+
+			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+}
