@@ -1,40 +1,62 @@
 package keeper
 
 import (
-	"fmt"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/disperze/nation-chain/x/nation/types"
+)
+
+// query endpoints
+const (
+	QueryNames = "names"
 )
 
 // NewQuerier creates a new querier for nation clients.
 func NewQuerier(k Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
 		switch path[0] {
-		case types.QueryParams:
-			return queryParams(ctx, k)
-			// TODO: Put the modules query routes
+		// case types.QueryParams:
+		// 	return queryParams(ctx, k)
+		case QueryNames:
+			return queryNames(ctx, path[1:], k)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown nation query endpoint")
 		}
 	}
 }
 
-func queryParams(ctx sdk.Context, k Keeper) ([]byte, error) {
-	params := k.GetParams(ctx)
+// nolint: unparam
+func queryNames(ctx sdk.Context, path []string, keeper Keeper) ([]byte, error) {
+	value, err := keeper.Get(ctx, path[0])
 
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+	if err != nil {
+		return nil, err
+	}
+
+	if value.Name == "" {
+		return []byte{}, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "could not resolve name")
+	}
+
+	res, err := codec.MarshalJSONIndent(keeper.cdc, value)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}
 
 	return res, nil
 }
+
+// func queryParams(ctx sdk.Context, k Keeper) ([]byte, error) {
+// 	params := k.GetParams(ctx)
+
+// 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, params)
+// 	if err != nil {
+// 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+// 	}
+
+// 	return res, nil
+// }
 
 // TODO: Add the modules query functions
 // They will be similar to the above one: queryParams()
