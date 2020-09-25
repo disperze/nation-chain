@@ -2,6 +2,7 @@ package nation
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -25,7 +26,10 @@ func NewHandler(k Keeper) sdk.Handler {
 // handleRegisterDni does x
 func handleMsgRegisterDni(ctx sdk.Context, k Keeper, msg MsgRegisterDni) (*sdk.Result, error) {
 	person := types.NewPerson()
-	person.Name = msg.Name
+	person.Name = strings.ToUpper(msg.Name)
+	person.MiddleName = strings.ToUpper(msg.MiddleName)
+	person.Surname1 = strings.ToUpper(msg.Surname1)
+	person.Surname2 = strings.ToUpper(msg.Surname2)
 	err := k.RegisterDni(ctx, msg.Dni, person)
 	if err != nil {
 		return nil, err
