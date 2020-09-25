@@ -17,13 +17,13 @@ type MsgRegisterDni struct {
 	MiddleName string         `json:"middle_name" yaml:"middle_name"`
 	Surname1   string         `json:"surname1" yaml:"surname1"`
 	Surname2   string         `json:"surname2" yaml:"surname2"`
-	Validator  sdk.ValAddress `json:"validator" yaml:"validator"` // address of the validator operator
+	Creator    sdk.AccAddress `json:"creator" yaml:"creator"` // address of the validator operator
 }
 
 // NewMsgRegisterDni creates a new MsgRegisterDni instance
-func NewMsgRegisterDni(validatorAddr sdk.ValAddress) MsgRegisterDni {
+func NewMsgRegisterDni(creatorAddr sdk.AccAddress) MsgRegisterDni {
 	return MsgRegisterDni{
-		Validator: validatorAddr,
+		Creator: creatorAddr,
 	}
 }
 
@@ -34,7 +34,7 @@ const RegisterDniConst = "RegisterDni"
 func (msg MsgRegisterDni) Route() string { return RouterKey }
 func (msg MsgRegisterDni) Type() string  { return RegisterDniConst }
 func (msg MsgRegisterDni) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{sdk.AccAddress(msg.Validator)}
+	return []sdk.AccAddress{msg.Creator}
 }
 
 // GetSignBytes gets the bytes for the message signer to sign on
@@ -57,8 +57,8 @@ func (msg MsgRegisterDni) ValidateBasic() error {
 	if len(msg.Surname2) == 0 {
 		return sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "Second surname cannot be empty")
 	}
-	if msg.Validator.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing validator address")
+	if msg.Creator.Empty() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing creator address")
 	}
 	return nil
 }

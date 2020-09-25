@@ -45,19 +45,14 @@ func GetCmdRegisterDni(cdc *codec.Codec) *cobra.Command {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 
-			validator, err := sdk.ValAddressFromBech32(cliCtx.GetFromAddress().String())
-			if err != nil {
-				return err
-			}
-
 			names := strings.Split(args[1], " ")
-			msg := types.NewMsgRegisterDni(validator)
+			msg := types.NewMsgRegisterDni(cliCtx.GetFromAddress())
 			msg.Dni = args[0]
 			msg.Name = names[0]
 			msg.MiddleName = strings.Join(names[1:], " ")
 			msg.Surname1 = args[2]
 			msg.Surname2 = args[3]
-			err = msg.ValidateBasic()
+			err := msg.ValidateBasic()
 			if err != nil {
 				return err
 			}
