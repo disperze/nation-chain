@@ -25,7 +25,6 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/disperze/nation-chain/app"
-
 )
 
 func main() {
@@ -47,8 +46,8 @@ func main() {
 	// with the cdc
 
 	rootCmd := &cobra.Command{
-		Use:   "appcli",
-		Short: "Command line interface for interacting with appd",
+		Use:   "nationcli",
+		Short: "Command line interface for interacting with nationd",
 	}
 
 	// Add --chain-id to persistent flags and mark it required
