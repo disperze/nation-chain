@@ -1,16 +1,12 @@
 package keeper
 
 import (
+	"github.com/disperze/nation-chain/x/nation/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-)
-
-// query endpoints
-const (
-	QueryNames = "names"
 )
 
 // NewQuerier creates a new querier for nation clients.
@@ -19,7 +15,7 @@ func NewQuerier(k Keeper) sdk.Querier {
 		switch path[0] {
 		// case types.QueryParams:
 		// 	return queryParams(ctx, k)
-		case QueryNames:
+		case types.QueryGetPerson:
 			return queryNames(ctx, path[1:], k)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "unknown nation query endpoint")
