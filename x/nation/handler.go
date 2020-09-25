@@ -13,31 +13,30 @@ func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
-		// TODO: Define your msg cases
-		// 
-		//Example:
-		// case Msg<Action>:
-		// 	return handleMsg<Action>(ctx, k, msg)
+		case MsgRegisterDni:
+			return handleMsgRegisterDni(ctx, k, msg)
 		default:
-			errMsg := fmt.Sprintf("unrecognized %s message type: %T", ModuleName,  msg)
+			errMsg := fmt.Sprintf("unrecognized %s message type: %T", ModuleName, msg)
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
 		}
 	}
 }
 
-// handle<Action> does x
-func handleMsg<Action>(ctx sdk.Context, k Keeper, msg Msg<Action>) (*sdk.Result, error) {
-	err := k.<Action>(ctx, msg.ValidatorAddr)
+// handleRegisterDni does x
+func handleMsgRegisterDni(ctx sdk.Context, k Keeper, msg MsgRegisterDni) (*sdk.Result, error) {
+	person := types.NewPerson()
+	person.Name = msg.Name
+	err := k.RegisterDni(ctx, msg.Dni, person)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: Define your msg events
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
-			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddr.String()),
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeyAction, types.EventTypeRegisterDni),
+			sdk.NewAttribute(types.AttributeDni, msg.Dni),
 		),
 	)
 
