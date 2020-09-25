@@ -14,13 +14,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/disperze/nation-chain/x/nation/client/cli"
 	"github.com/disperze/nation-chain/x/nation/client/rest"
-	"github.com/disperze/nation-chain/x/nation/keeper"
+	"github.com/disperze/nation-chain/x/nation/types"
 )
 
 // Type check to ensure the interface is properly implemented
 var (
-	_ module.AppModule           = AppModule{}
-	_ module.AppModuleBasic      = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 // AppModuleBasic defines the basic application module used by the nation module.
@@ -73,16 +73,15 @@ func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	keeper        keeper.Keeper
+	keeper Keeper
 	// TODO: Add keepers that your application depends on
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(k keeper.Keeper, /*TODO: Add Keepers that your application depends on*/) AppModule {
+func NewAppModule(k Keeper) AppModule {
 	return AppModule{
-		AppModuleBasic:      AppModuleBasic{},
-		keeper:              k,
-		// TODO: Add keepers that your application depends on
+		AppModuleBasic: AppModuleBasic{},
+		keeper:         k,
 	}
 }
 
@@ -111,7 +110,7 @@ func (AppModule) QuerierRoute() string {
 
 // NewQuerierHandler returns the nation module sdk.Querier.
 func (am AppModule) NewQuerierHandler() sdk.Querier {
-	return types.NewQuerier(am.keeper)
+	return NewQuerier(am.keeper)
 }
 
 // InitGenesis performs genesis initialization for the nation module. It returns
