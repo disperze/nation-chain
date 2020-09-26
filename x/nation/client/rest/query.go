@@ -15,11 +15,11 @@ func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router) {
 
 	r.HandleFunc(
 		fmt.Sprintf("/nation/dni/{%s}", restDni),
-		queryParamsHandlerFn(cliCtx),
+		queryDniHandlerFn(cliCtx),
 	).Methods("GET")
 
 	r.HandleFunc(
-		"/nation/parameters/{%s}",
+		"/nation/parameters",
 		queryParamsHandlerFn(cliCtx),
 	).Methods("GET")
 }
