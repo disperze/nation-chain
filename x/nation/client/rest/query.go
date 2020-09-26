@@ -33,7 +33,7 @@ func queryDniHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 		vars := mux.Vars(r)
 		paramType := vars[restDni]
 
-		route := fmt.Sprintf(fmt.Sprintf("custom/%s/person/%s", types.QuerierRoute, paramType), types.QuerierRoute)
+		route := fmt.Sprintf(fmt.Sprintf("custom/%s/%s/%s", types.QuerierRoute, types.QueryGetPerson, paramType), types.QuerierRoute)
 
 		res, height, err := cliCtx.QueryWithData(route, nil)
 		if err != nil {
