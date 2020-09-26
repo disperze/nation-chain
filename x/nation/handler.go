@@ -30,6 +30,7 @@ func handleMsgRegisterDni(ctx sdk.Context, k Keeper, msg MsgRegisterDni) (*sdk.R
 	person.MiddleName = strings.ToUpper(msg.MiddleName)
 	person.Surname1 = strings.ToUpper(msg.Surname1)
 	person.Surname2 = strings.ToUpper(msg.Surname2)
+	person.Creator = msg.Creator
 	err := k.RegisterDni(ctx, msg.Dni, person)
 	if err != nil {
 		return nil, err
